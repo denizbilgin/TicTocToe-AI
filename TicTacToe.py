@@ -4,11 +4,23 @@ class TicTacToe:
     __PLAYER_SIGN = 1
     __AI_SIGN = 2
     __EMPTY_SPACE = 0
-    __BOARD_SIZE = 3
+    BOARD_SIZE = 3
 
-    def __init__(self, isPlayerTurn):
-        self.__board = [[self.__EMPTY_SPACE for _ in range(self.__BOARD_SIZE)] for _ in range(self.__BOARD_SIZE)]
-        self.__playerTurn = isPlayerTurn
+    def __init__(self, is_player_turn):
+        self.__board = [[self.__EMPTY_SPACE for _ in range(self.BOARD_SIZE)] for _ in range(self.BOARD_SIZE)]
+        self.__player_turn = is_player_turn
+
+    def get_player_turn(self) -> bool:
+        return self.__player_turn
+
+    def set_player_turn(self, value:bool):
+        self.__player_turn = value
+
+    def get_board(self) -> list[list[int]]:
+        return self.__board
+
+    def get_empty_space(self):
+        return self.__EMPTY_SPACE
 
     def print_board(self, label="Current position of the board is:"):
         """
@@ -17,8 +29,8 @@ class TicTacToe:
         """
         print("-------")
         print(label)
-        for i in range(self.__BOARD_SIZE):
-            for j in range(self.__BOARD_SIZE):
+        for i in range(self.BOARD_SIZE):
+            for j in range(self.BOARD_SIZE):
                 if self.__board[i][j] == self.__PLAYER_SIGN:
                     print("X", end=" ")
                 elif self.__board[i][j] == self.__AI_SIGN:
@@ -44,7 +56,7 @@ class TicTacToe:
         :return: State of the game
         """
 
-        for i in range(self.__BOARD_SIZE):
+        for i in range(self.BOARD_SIZE):
             # Checking rows
             if self.__board[i][0] == self.__board[i][1] == self.__board[i][2] != self.__EMPTY_SPACE:
                 return self.__board[i][0]
@@ -77,18 +89,32 @@ class TicTacToe:
             print("Cell is already occupied")
             return
 
-        if self.__playerTurn:
+        if self.__player_turn:
             self.__board[row][col] = self.__PLAYER_SIGN
         else:
             self.__board[row][col] = self.__AI_SIGN
 
+    def undo_move(self, row, col):
+        if self.__board[row][col] != self.__EMPTY_SPACE:
+            self.__board[row][col] = self.__EMPTY_SPACE
 
-        game_ended = self.is_game_ended()
-        if game_ended == -1:
-            self.__playerTurn = not self.__playerTurn
-        elif game_ended == 0:
-            print("DRAW!")
-        elif game_ended == 1:
-            print("PLAYER WINS THE GAME!")
-        elif game_ended == 2:
-            print("AI WINS THE GAME!")
+    def score(self, winner, depth) -> int:
+        """
+        This function calculates the score for the minimax algorithm based on the winner and depth
+        :param winner: The winner of the game
+        :param depth: The depth of the recursive search
+        :return: The score for the current state
+        """
+        if winner == self.__AI_SIGN:
+            return 10 - depth
+        elif winner == self.__PLAYER_SIGN:
+            return depth - 10
+        else:
+            return 0
+
+    def get_available_moves(self) -> list[tuple[int, int]]:
+        """
+        This function returns a list of available moves as tuples (row, col)
+        """
+        return [(i, j) for i in range(self.BOARD_SIZE) for j in range(self.BOARD_SIZE) if
+                self.__board[i][j] == self.__EMPTY_SPACE]
